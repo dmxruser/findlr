@@ -1,41 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import SearchBar from './search';
 
-// This interface defines the shape of our project data for TypeScript.
-interface Project {
-  id: number;
-  title: string;
-  url: string;
-}
+function TitleCard(props: { url: string }) {
+  // A simple function to extract a title from a URL
+  const extractTitle = (url: string) => {
+    try {
+      const urlObject = new URL(url);
+      // Use the pathname and remove leading slash
+      let title = urlObject.pathname.substring(1);
+      // Replace slashes and dashes with spaces
+      title = title.replace(/[/_-]/g, ' ');
+      // Capitalize first letter of each word
+      return title.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    } catch (e) {
+      // If it's not a valid URL, just return the original string
+      return url;
+    }
+  };
 
-function TitleCard(props: { title: string, url: string }) {
+  const title = extractTitle(props.url);
+
   return (
     <div>
-      <a href={props.url}>{props.title}</a>
+      <a href={props.url} target="_blank" rel="noopener noreferrer">{title}</a>
     </div>
   );
 }
 
 function App() {
-  // Create a state variable to hold the list of projects.
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [searchResults, setSearchResults] = useState<string[]>([]);
 
-  // This useEffect hook will run once when the component loads.
-  useEffect(() => {
-    // We fetch the data from your backend endpoint.
-    // Make sure your Python server is running on this address.
-    fetch('http://localhost:8000/projects')
-      .then(response => response.json())
-      .then(data => setProjects(data))
-      .catch(error => console.error('Error fetching projects:', error));
-  }, []); // The empty array tells React to only run this effect once.
+  const handleSearchResults = useCallback((results: string[]) => {
+    setSearchResults(results);
+  }, []);
 
   return (
     <div>
+      <SearchBar onSearchResults={handleSearchResults} />
       <h1>Find the projects you want</h1>
       <div>
-        {/* We now use .map() to render the list from the state. */}
-        {projects.map(project => (
-          <TitleCard key={project.id} title={project.title} url={project.url} />
+        {searchResults.map((result, index) => (
+          <TitleCard key={index} url={result} />
         ))}
       </div>
     </div>

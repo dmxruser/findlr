@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict
+from ddgs import DDGS
 
 app = FastAPI()
 
@@ -38,6 +39,18 @@ def get_projects():
     """Returns the full list of projects."""
     return projects_data
 
-# To run this, you'll need uvicorn:
-# pip install "uvicorn[standard]"
-# uvicorn main:app --reload
+@app.get("/search")
+def search_duckduckgo(q: str):
+    """Performs a DuckDuckGo search for GitHub repositories."""
+    search_query = f"site:github.com {q}"
+    print(f"Searching for: {search_query}")
+    try:
+        with DDGS() as ddgs:
+            search_results = [r['href'] for r in ddgs.text(search_query, max_results=10)]
+        print(f"Found {len(search_results)} results.")
+        return {"results": search_results}
+    except Exception as e:
+        print(f"An error occurred during search: {e}")
+        return {"results": []}
+
+
