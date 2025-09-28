@@ -2,3 +2,5 @@ fastapi
 uvicorn[standard]
 PyGithub
 ddgs
+google-geneai
+python-dotenv

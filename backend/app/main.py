@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict
 from ddgs import DDGS
-
+from google import genai
 app = FastAPI()
 
 # This is the CORS policy. It's a magical incantation.
@@ -10,7 +10,7 @@ app = FastAPI()
 # In a development environment, your React app runs on a different port (e.g., 3000),
 # so we have to explicitly permit it.
 origins = [
-    "http://localhost:3000",  # Your React dev server
+    "http://localhost:3000",  
     "http://127.0.0.1:3000",
 ]
 
@@ -22,22 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Your projects data, now living in Python, where it belongs.
-projects_data: List[Dict] = [
-    {'id': 1, 'title': 'Unix!', 'url': '/projects/1'},
-    {'id': 2, 'title': 'Eek!', 'url': '/projects/2'},
-    {'id': 3, 'title': 'BlahBlah', 'url': '/projects/3'},
-]
+client = genai.Client()
 
-@app.get("/")
-def read_root():
-    """Returns a basic greeting to confirm the server is running."""
-    return {"Hello": "World"}
-
-@app.get("/projects")
-def get_projects():
-    """Returns the full list of projects."""
-    return projects_data
 
 @app.get("/search")
 def search_duckduckgo(q: str):
@@ -46,7 +32,14 @@ def search_duckduckgo(q: str):
     print(f"Searching for: {search_query}")
     try:
         with DDGS() as ddgs:
-            search_results = [r['href'] for r in ddgs.text(search_query, max_results=10)]
+            response = client.models.generate_content(
+                model="gemini-2.5-flash", contents=f"Translate the following user request into a single, concise search query for finding a GitHub repository: {q}"
+            )
+            outputAi = response.text
+            if outputAi:
+                search_results = [r['href'] for r in ddgs.text(outputAi, max_results=10)]
+            else:
+                search_results = []
         print(f"Found {len(search_results)} results.")
         return {"results": search_results}
     except Exception as e:
