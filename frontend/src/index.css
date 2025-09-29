@@ -1,6 +1,9 @@
 /* Base styles */
 body {
-  background-image: url("/frontend/src/images/AKL.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -8,6 +11,7 @@ body {
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
+  color: white;
 }
 
 /* Text styles */
