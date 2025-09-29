@@ -1,0 +1,18 @@
+/*
+The SUSE Mono variable font is imported in index.html.
+It supports a weight range from 100 to 800.
+*/
+body {
+  font-family: "SUSE Mono", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400; /* Default regular weight */
+  font-style: normal;
+}
+
+/*
+This allows the browser to handle bolding semantically
+using tags like <b> or <strong>.
+*/
+b, strong {
+  font-weight: 700; /* Bold weight */
+}
