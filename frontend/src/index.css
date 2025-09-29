@@ -1,6 +1,6 @@
 /* Base styles */
 body {
-  background-image: url("/frontend/images/AKL.jpg");
+  background-image: url("/frontend/src/images/AKL.jpg");
   margin: 0;
   padding: 0;
   min-height: 100vh;
