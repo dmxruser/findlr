@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 interface SearchBarProps {
-  onSearchResults: (results: any[]) => void;
+  onSearchResults: (results: any[], error: string | null, aiQuery: string | null) => void;
 }
 
 const SearchBar = ({ onSearchResults }: SearchBarProps) => {
@@ -15,17 +15,25 @@ const SearchBar = ({ onSearchResults }: SearchBarProps) => {
     }
 
     if (searchTerm.trim() === '') {
-      onSearchResults([]);
+      onSearchResults([], null, null);
       return;
     }
 
     const debounceTimer = setTimeout(() => {
       fetch(`http://localhost:8000/search?q=${searchTerm}`)
-        .then(response => response.json())
-        .then(data => {
-          onSearchResults(data.results);
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.detail || 'Server error') });
+          }
+          return response.json();
         })
-        .catch(error => console.error('Error fetching search results:', error));
+        .then(data => {
+          onSearchResults(data.results || [], null, data.ai_query || null);
+        })
+        .catch(error => {
+          console.error('Error fetching search results:', error);
+          onSearchResults([], error.message, null);
+        });
     }, 500);
 
     return () => {

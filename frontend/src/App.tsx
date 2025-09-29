@@ -29,15 +29,21 @@ function TitleCard(props: { url: string }) {
 
 function App() {
   const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [aiQuery, setAiQuery] = useState<string | null>(null);
 
-  const handleSearchResults = useCallback((results: string[]) => {
+  const handleSearchResults = useCallback((results: string[], errorMsg: string | null, query: string | null) => {
     setSearchResults(results);
+    setError(errorMsg);
+    setAiQuery(query);
   }, []);
 
   return (
     <div>
       <SearchBar onSearchResults={handleSearchResults} />
       <h1>Find the projects you want</h1>
+      {error && <div style={{ color: 'red' }}>Error: {error}</div>}
+      {aiQuery && <div><p>AI Generated Query: <strong>{aiQuery}</strong></p></div>}
       <div>
         {searchResults.map((result, index) => (
           <TitleCard key={index} url={result} />

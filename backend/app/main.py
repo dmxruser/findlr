@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict
 from ddgs import DDGS
@@ -28,22 +28,30 @@ client = genai.Client()
 @app.get("/search")
 def search_duckduckgo(q: str):
     """Performs a DuckDuckGo search for GitHub repositories."""
-    search_query = f"site:github.com {q}"
-    print(f"Searching for: {search_query}")
+    prompt = f"Translate the following user request into a single, concise search query for finding a GitHub repository. Return only the search query itself, with no extra text or formatting: {q}"
+    
     try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=prompt
+        )
+        
+        if not response.text:
+            raise HTTPException(status_code=500, detail="AI model returned an empty response.")
+
+        ai_query = response.text.strip()
+        search_query = f"site:github.com {ai_query}"
+        
+        print(f"Refined search query: {search_query}")
+
         with DDGS() as ddgs:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash", contents=f"Translate the following user request into a single, concise search query for finding a GitHub repository: {q}"
-            )
-            outputAi = response.text
-            if outputAi:
-                search_results = [r['href'] for r in ddgs.text(outputAi, max_results=10)]
-            else:
-                search_results = []
+            search_results = [r['href'] for r in ddgs.text(search_query, max_results=10)]
+        
         print(f"Found {len(search_results)} results.")
-        return {"results": search_results}
+        return {"results": search_results, "ai_query": ai_query}
+
     except Exception as e:
-        print(f"An error occurred during search: {e}")
-        return {"results": []}
+        print(f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail=f"An error occurred during the search: {str(e)}")
 
 
