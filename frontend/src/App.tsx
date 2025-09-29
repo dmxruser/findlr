@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import SearchBar from './search';
 
 function TitleCard(props: { url: string }) {
@@ -39,11 +39,11 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <SearchBar onSearchResults={handleSearchResults} />
-      <h1>Find the projects you want</h1>
+    <div className="Main">
+      <h1>Find the projects <i>you</i> want</h1>
       {error && <div style={{ color: 'red' }}>Error: {error}</div>}
       {aiQuery && <div><p>AI Generated Query: <strong>{aiQuery}</strong></p></div>}
+      <SearchBar onSearchResults={handleSearchResults} />
       <div>
         {searchResults.map((result, index) => (
           <TitleCard key={index} url={result} />
