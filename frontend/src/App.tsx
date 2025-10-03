@@ -31,6 +31,14 @@ function App() {
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [aiQuery, setAiQuery] = useState<string | null>(null);
+  const [apod, setApod] = useState<any>(null);
+
+  useEffect(() => {
+    fetch(`https://api.nasa.gov/planetary/apod?api_key=ieG2DTDdLUCZij8vvxuOWhJPsIqpxPCKcb3e2bSF`)
+      .then(response => response.json())
+      .then(data => setApod(data))
+      .catch(error => console.error('Error fetching APOD:', error));
+  }, []);
 
   const handleSearchResults = useCallback((results: string[], errorMsg: string | null, query: string | null) => {
     setSearchResults(results);
@@ -39,7 +47,7 @@ function App() {
   }, []);
 
   return (
-    <div className="Main">
+    <div className="Main" style={{ backgroundImage: apod ? `url(${apod.url})` : 'none' }}>
       <h1>Find the projects <i>you</i> want</h1>
       {error && <div style={{ color: 'red' }}>Error: {error}</div>}
       {aiQuery && <div><p>AI Generated Query: <strong>{aiQuery}</strong></p></div>}
@@ -49,6 +57,12 @@ function App() {
           <TitleCard key={index} url={result} />
         ))}
       </div>
+      {apod && (
+        <div className="apod-container">
+          <h2>{apod.title}</h2>
+          <p>{apod.explanation}</p>
+        </div>
+      )}
     </div>
   );
 }
