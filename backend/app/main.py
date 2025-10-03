@@ -28,7 +28,7 @@ client = genai.Client()
 @app.get("/search")
 def search_duckduckgo(q: str):
     """Performs a DuckDuckGo search for GitHub repositories."""
-    prompt = f"Translate the following user request into a single, concise search query for finding a GitHub repository. Return only the search query itself, with no extra text or formatting: {q}"
+    prompt = f"Translate the following user request into a single, concise search query for finding a project that does the thing that the person wants. Return only the search query itself, with no extra text or formatting. If you know a project name that would fit this persons query, do that instead.: {q}"
     
     try:
         response = client.models.generate_content(
@@ -40,7 +40,7 @@ def search_duckduckgo(q: str):
             raise HTTPException(status_code=500, detail="AI model returned an empty response.")
 
         ai_query = response.text.strip()
-        search_query = f"site:github.com {ai_query}"
+        search_query = f"{ai_query}"
         
         print(f"Refined search query: {search_query}")
 
